@@ -2,6 +2,8 @@ from RESOURCES import *
 from AES_HELPER import add_round_key
 from AES_HELPER import substitute_byte
 from AES_HELPER import shift_row
+from AES_HELPER import mix_columns
+from AES_HELPER import update_text
 import binascii
 import numpy as np
 #import itertools
@@ -70,6 +72,7 @@ print("Number of bits in AES \n")
 print("1) 128 ","\n","2) 192" ,"\n","3) 256")
 round_num = 0
 aes = input("Select any of 1,2,3: ")
+print("\n")
 
 while aes != "1" and aes != "2" and aes != "3":
     aes = input("Type again: Select any of 1,2,3 : ")
@@ -85,33 +88,26 @@ if aes == "3" :
 
 
 
+print("Key:")
+key = input("In ASCII: ")
 
-key = input("Enter Key: ")
-plain_text = input("Enter message: ")
 spacebar = " "
-
-null = "\0"
-
 key_in_hex = binascii.hexlify( bytes(key, 'utf-8') ).decode('utf-8')
 space_padding = binascii.hexlify( bytes(spacebar,'utf-8') ).decode('utf-8')
 
-# key_in_hex = hex( key )
-# space_padding = hex( spacebar )
-
-
 key_set_in_hex_pair = [key_in_hex[i:i+2] for i in range(0,len(key_in_hex), 2)]
-
-r128 = [1,2,4,8,16,32,64,128,27,54]
-r192 = [1,1,1,2,4,4,8,16,16,32,32,32,64]
-r256 = [1,1,1,1,2,2,4,4,8,8,8,8,16,16,32]
-
 
 if round_num == 10:
     
     padding_128 = [space_padding for i in range(len(key_in_hex),32, 2)]
     key_set_in_hex_pair = key_set_in_hex_pair + padding_128
 
+print("In HEX: ",key_set_in_hex_pair,"\n")
 
+
+print("Plain Text:")
+plain_text = input("In ASCII: ")
+null = "\0"
 
 message_in_hex = binascii.hexlify( bytes(plain_text, 'utf-8') ).decode('utf-8')
 null_padding = binascii.hexlify( bytes(null,'utf-8') ).decode('utf-8')
@@ -121,7 +117,24 @@ padding = [null_padding for i in range(len(message_in_hex),32, 2)]
 
 message_set_in_hex_pair = message_set_in_hex_pair + padding
 
-print(key_set_in_hex_pair,message_set_in_hex_pair)
+print("In HEX: ",message_set_in_hex_pair)
+
+# key_in_hex = hex( key )
+# space_padding = hex( spacebar )
+
+
+
+
+r128 = [1,2,4,8,16,32,64,128,27,54]
+r192 = [1,1,1,2,4,4,8,16,16,32,32,32,64]
+r256 = [1,1,1,1,2,2,4,4,8,8,8,8,16,16,32]
+
+
+
+
+
+
+#print(key_set_in_hex_pair,message_set_in_hex_pair)
 
 round_key = key_set_in_hex_pair
 
@@ -141,7 +154,9 @@ for i in range (0,round_num,1):
 
     shift_row_set_dec = shift_row(sub_byte_set_dec)
 
-    print(shift_row_set_dec)
+    
+
+    #print(shift_row_set_dec)
 
     #print(sub_byte_set_dec)
 
@@ -152,7 +167,7 @@ for i in range (0,round_num,1):
     
 
     if round_num == 10:
-        rcon = [r128[i], 0, 0 , 0]
+        rcon = [r128[i], 0, 0 , 0]       
         round_key = expand_key_128(round_key,rcon)
 
     if round_num == 12:
@@ -160,6 +175,38 @@ for i in range (0,round_num,1):
 
     if round_num == 14:
         rcon = [r256[i], 0, 0 , 0]
+
+    if( i != round_num-1 ) :
+        
+        mixed_col_set_dec = mix_columns(shift_row_set_dec)
+
+        updated_text = update_text(mixed_col_set_dec)
+
+    else :
+
+        updated_text = update_text(shift_row_set_dec)
+
+        updated_text = np.mat(updated_text).reshape(4,4)
+
+        updated_text.shape
+
+        updated_text =updated_text.transpose()
+
+
+        updated_text = add_round_key(round_key,updated_text)
+
+        updated_text = np.mat(updated_text).reshape(4,4)
+
+        updated_text.shape
+
+        updated_text = updated_text.transpose()
+
+        #print(round_key_matrix_hex)
+
+        updated_text = [[hex(j) for j in row] for row in np.array(updated_text)]
+
+
+        print(updated_text)
 
 
 

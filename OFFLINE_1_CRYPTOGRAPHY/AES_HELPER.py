@@ -57,3 +57,70 @@ def shift_row(sub_byte_set_dec):
         shift_row_set_dec[i] = np.roll(shift_row_set_dec[i],-i)
 
     return shift_row_set_dec
+
+def galois_multiplication(a, b):
+
+    b = int(b)
+
+    if b == 1:
+        return a
+    
+    tmp = (a << 1) & 0xff
+    if b == 2 and a < 128:
+        return tmp  
+    
+    if b == 2 and a >= 128:
+        return tmp ^ 0x1b
+
+    if b == 3:
+        return galois_multiplication(a, 2) ^ a
+    
+def mix_columns_set(shift_row_vector):
+
+    mcolset =[]
+    entry = 0
+
+    for i in range( 0, 4, 1 ):
+
+        for j in range( 0, 4, 1 ):
+
+            entry = entry ^ galois_multiplication(shift_row_vector[j],Mixer[i][j])
+        
+        #print( int( Mixer[i][j] ) )
+
+        mcolset.append(entry)
+
+        entry = 0
+
+    return mcolset
+
+def mix_columns(shift_row_set_dec):
+
+    shift_row_set_dec = np.mat(shift_row_set_dec).reshape(4,4)
+
+    shift_row_set_dec.shape
+
+    shift_row_set_dec = shift_row_set_dec.transpose()
+
+    mixed_column_dec = []
+
+    for x in np.array(shift_row_set_dec):
+
+        mixed_column_dec.append( mix_columns_set(x) )
+        #print(x)
+
+    # mixed_column_dec = np.mat(mixed_column_dec).reshape(4,4)
+
+    # mixed_column_dec.shape
+
+    # mixed_column_dec = mixed_column_dec.transpose()
+
+    return mixed_column_dec
+
+def update_text(text_matrix):
+
+    text_mat = [[hex(i) for i in row] for row in np.array(text_matrix)]  
+    return text_mat
+
+
+    
