@@ -249,6 +249,8 @@ round_key = schedule_key()
 
 key_schedule_time = t.time() - key_schedule_time
 
+key_schedule_time = key_schedule_time * 1000
+
 #print(round_key)
 
 cipher_text_hex = []
@@ -288,6 +290,8 @@ print("\n")
 print("In ASCII: ",cipher_text_str,"\n\n")
 
 encryption_time = t.time() - encryption_time
+
+encryption_time = encryption_time *1000
 
 print("Key Schedule Time : " ,key_schedule_time," sec")
 print("Encryption Time : ",encryption_time," sec")
