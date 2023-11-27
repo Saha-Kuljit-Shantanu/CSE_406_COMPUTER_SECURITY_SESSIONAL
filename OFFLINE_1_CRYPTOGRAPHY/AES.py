@@ -6,7 +6,7 @@ from AES_HELPER import mix_columns
 from AES_HELPER import update_text
 import binascii
 import numpy as np
-#import itertools
+import time as t
 
 
 
@@ -66,10 +66,94 @@ def expand_key_128(rk,rc):
     return rk
 
 
+def schedule_key():
+
+    rk = [round_key]
+    
+    #rk.append()
+    #print(rk)
+
+    for c in range(0,round_num,1) : 
+
+        if round_num == 10:
+            rcon = [r128[c], 0, 0 , 0]      
+
+            temp_round_key = rk[c][:]
+
+            #print(rk)
+            
+            temp_round_key = expand_key_128(temp_round_key,rcon)
+
+            rk.extend( [temp_round_key] )
+            #print(rk)
+
+        if round_num == 12:
+            rcon = [r192[c], 0, 0 , 0]
+
+        if round_num == 14:
+            rcon = [r256[c], 0, 0 , 0]
+
+    return rk
+
+def encrypt(text):
+
+    for i in range (0,round_num,1):
+    
+
+    #print(key_set_in_hex_pair)
+
+    #print( np.bitwise_xor(round_key , updated_text) )
+
+    #print(round_key[i])
+
+        xor_set_dec = add_round_key(round_key[i],text)
+
+        sub_byte_set_dec = substitute_byte(xor_set_dec)
+
+        shift_row_set_dec = shift_row(sub_byte_set_dec)
 
     
+
+    #print(shift_row_set_dec)
+
+    #print(sub_byte_set_dec)
+
+    #print( np.bitwise_xor( np.array( round_key_matrix ) , np.array( updated_text_matrix ) ) )
+   
+
+        if( i != round_num-1 ) :
+        
+            mixed_col_set_dec = mix_columns(shift_row_set_dec)
+
+            text = update_text(mixed_col_set_dec)
+
+        else :
+
+            text = update_text(shift_row_set_dec)
+
+            text = np.mat(text).reshape(4,4)
+
+            text.shape
+
+            text = text.transpose()
+
+
+            text = add_round_key(round_key[i+1],text)
+
+            text = np.mat(text).reshape(4,4)
+
+            text.shape
+
+            text = text.transpose()
+
+            #print(round_key_matrix_hex)
+
+            text = [[hex(j) for j in row] for row in np.array(text)]
+
+    return text       
+    
 print("Number of bits in AES \n")
-print("1) 128 ","\n","2) 192" ,"\n","3) 256")
+print(" 1) 128 ","\n","2) 192 " ,"\n","3) 256 \n")
 round_num = 0
 aes = input("Select any of 1,2,3: ")
 print("\n")
@@ -102,7 +186,11 @@ if round_num == 10:
     padding_128 = [space_padding for i in range(len(key_in_hex),32, 2)]
     key_set_in_hex_pair = key_set_in_hex_pair + padding_128
 
-print("In HEX: ",key_set_in_hex_pair,"\n")
+print ("In HEX: ")
+for i in key_set_in_hex_pair:
+    print ( '%02X' % int(i,16) ,end=' ')
+    #print ( hex( int(i) )[2:] )
+print("\n\n")
 
 
 print("Plain Text:")
@@ -112,24 +200,31 @@ null = "\0"
 message_in_hex = binascii.hexlify( bytes(plain_text, 'utf-8') ).decode('utf-8')
 null_padding = binascii.hexlify( bytes(null,'utf-8') ).decode('utf-8')
 
-message_set_in_hex_pair = [message_in_hex[i:i+2] for i in range(0,len(message_in_hex), 2)]
-padding = [null_padding for i in range(len(message_in_hex),32, 2)]
+msg_len = len(message_in_hex)
+pad_len = 31 - (msg_len-1)%32
+tot_len = msg_len + pad_len
+num_chunks = tot_len//32
+
+message_set_in_hex_pair = [message_in_hex[i:i+2] for i in range(0,msg_len, 2)]
+padding = [null_padding for i in range(msg_len,tot_len, 2)]
 
 message_set_in_hex_pair = message_set_in_hex_pair + padding
 
-print("In HEX: ",message_set_in_hex_pair)
+print ("In HEX: ")
+for i in message_set_in_hex_pair:
+    print ( '%02X' % int(i,16) ,end=' ')
+    #print ( hex( int(i) )[2:] )
+print("\n\n")
 
 # key_in_hex = hex( key )
 # space_padding = hex( spacebar )
 
+message_chunks = []
 
 
+for i in range(0,num_chunks,1):
 
-r128 = [1,2,4,8,16,32,64,128,27,54]
-r192 = [1,1,1,2,4,4,8,16,16,32,32,32,64]
-r256 = [1,1,1,1,2,2,4,4,8,8,8,8,16,16,32]
-
-
+    message_chunks.append( message_set_in_hex_pair[i*(len(message_set_in_hex_pair))//num_chunks:(i+1) * (len(message_set_in_hex_pair))//num_chunks] )
 
 
 
@@ -138,75 +233,64 @@ r256 = [1,1,1,1,2,2,4,4,8,8,8,8,16,16,32]
 
 round_key = key_set_in_hex_pair
 
-updated_text = message_set_in_hex_pair
+key_schedule_time = 0
+
+encryption_time = 0
+
+decryption_time = 0
+
+r128 = [1,2,4,8,16,32,64,128,27,54]
+r192 = [1,1,1,2,4,4,8,16,16,32,32,32,64]
+r256 = [1,1,1,1,2,2,4,4,8,8,8,8,16,16,32]
+
+key_schedule_time = t.time()
+
+round_key = schedule_key() 
+
+key_schedule_time = t.time() - key_schedule_time
+
+#print(round_key)
+
+cipher_text_hex = []
+cipher_text = []
+cipher_text_str = ""
+
+encryption_time = t.time()
 
 
-for i in range (0,round_num,1):
+
+for plain_text in message_chunks :
+
+    #print(plain_text)
+
+    cipher_text_hex = cipher_text_hex + encrypt(plain_text)
+
+for text in cipher_text_hex:
     
+    for byte in text:
 
-    #print(key_set_in_hex_pair)
+        cipher_text.append( byte )
 
-    #print( np.bitwise_xor(round_key , updated_text) )
+for byte in cipher_text :
 
-    xor_set_dec = add_round_key(round_key,updated_text)
-
-    sub_byte_set_dec = substitute_byte(xor_set_dec)
-
-    shift_row_set_dec = shift_row(sub_byte_set_dec)
-
-    
-
-    #print(shift_row_set_dec)
-
-    #print(sub_byte_set_dec)
-
-    #print( np.bitwise_xor( np.array( round_key_matrix ) , np.array( updated_text_matrix ) ) )
-
-    
-
-    
-
-    if round_num == 10:
-        rcon = [r128[i], 0, 0 , 0]       
-        round_key = expand_key_128(round_key,rcon)
-
-    if round_num == 12:
-        rcon = [r192[i], 0, 0 , 0]
-
-    if round_num == 14:
-        rcon = [r256[i], 0, 0 , 0]
-
-    if( i != round_num-1 ) :
-        
-        mixed_col_set_dec = mix_columns(shift_row_set_dec)
-
-        updated_text = update_text(mixed_col_set_dec)
-
-    else :
-
-        updated_text = update_text(shift_row_set_dec)
-
-        updated_text = np.mat(updated_text).reshape(4,4)
-
-        updated_text.shape
-
-        updated_text =updated_text.transpose()
+    cipher_text_str = cipher_text_str + chr(int(byte,16)) 
 
 
-        updated_text = add_round_key(round_key,updated_text)
+print("Ciphered Text: ")
 
-        updated_text = np.mat(updated_text).reshape(4,4)
+print("In HEX: ")
 
-        updated_text.shape
+for i in cipher_text:
+    print ( '%02X' % int(i,16) ,end=' ' )
 
-        updated_text = updated_text.transpose()
+print("\n")
 
-        #print(round_key_matrix_hex)
+print("In ASCII: ",cipher_text_str,"\n\n")
 
-        updated_text = [[hex(j) for j in row] for row in np.array(updated_text)]
+encryption_time = t.time() - encryption_time
 
-
-        print(updated_text)
+print("Key Schedule Time : " ,key_schedule_time," sec")
+print("Encryption Time : ",encryption_time," sec")
 
 
 
