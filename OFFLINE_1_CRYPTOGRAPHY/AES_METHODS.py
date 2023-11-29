@@ -5,17 +5,16 @@ from AES_HELPER_METHODS import shift_row,inv_shift_row
 from AES_HELPER_METHODS import mix_columns
 from AES_HELPER_METHODS import update_text
 
-r128 = [1,2,4,8,16,32,64,128,27,54]
-r192 = [1,1,1,2,4,4,8,16,16,32,32,32,64]
-r256 = [1,1,1,1,2,2,4,4,8,8,8,8,16,16,32]
+round_constant_vector = [1,2,4,8,16,32,64,128,27,54]
 
 
-def g(w3,rc):
 
-    w3 = np.roll(w3,-1)
+def g(wx,rc):
+
+    wx = np.roll(wx,-1)
 
     #print(w3)
-    s = [Sbox[ int(w3[i],16) ] for i in range(0,len(w3), 1)]
+    s = [Sbox[ int(wx[i],16) ] for i in range(0,len(wx), 1)]
 
     #print(s)
 
@@ -25,7 +24,7 @@ def g(w3,rc):
     return g_int
 
 
-def expand_key_128(rk,rc):
+def expand_key(rk,rc,rn):
 
     w_hex = []
 
@@ -33,41 +32,52 @@ def expand_key_128(rk,rc):
 
     w = []
 
-    for i in range(0,4,1):
+    col_len = rn-6
 
-        w_hex.append( rk[i*(len(rk)//4):(i+1) * (len(rk)//4)] )
+
+
+    for i in range(0,col_len,1):
+
+        w_hex.append( rk[i*(len(rk)//col_len):(i+1) * (len(rk)//col_len)] )
 
     #print(w[3])
 
-    u = g(w_hex[3],rc)
+    u = g(w_hex[col_len-1],rc)
 
     #print(w[3])
 
     #print(u)
 
-    for i in range(0,4,1):
+    for i in range(0,col_len,1):
 
         w_int.append( [ int(w_hex[i][j],16) for j in range(0,len(w_hex[i]), 1)] )
+
         w_int[i] = [ u[j] ^ w_int[i][j] for j in range(0,len(w_int[i]), 1)]
+
         u = w_int[i]
+
         w.append( [ hex(w_int[i][j]) for j in range(0,len(w_int[i]), 1) ])
 
     #rk = [int(key_set_in_hex_pair[i],16) for i in range(0,len(key_set_in_hex_pair), 1)]
 
     #print(w)
 
-    for i in range(0,4,1):
+    rk = []
 
-        for j in range(0,4,1):
+    for i in w:
 
-            rk[4*i+j] = w[i][j]
+        for j in i:
+
+            rk.append(j)
 
     return rk
 
 
 def schedule_key(key,round_num):
 
-    rk = [key]
+    counter = 0
+
+    rk = [key[:16]]
     
     #rk.append()
     #print(rk)
@@ -75,22 +85,67 @@ def schedule_key(key,round_num):
     for c in range(0,round_num,1) : 
 
         if round_num == 10:
-            rcon = [r128[c], 0, 0 , 0]      
+
+            rcon = [round_constant_vector[c], 0, 0 , 0]      
 
             temp_round_key = rk[c][:]
 
             #print(rk)
             
-            temp_round_key = expand_key_128(temp_round_key,rcon)
+            temp_round_key = expand_key(temp_round_key,rcon,round_num)
 
             rk.extend( [temp_round_key] )
             #print(rk)
 
         if round_num == 12:
-            rcon = [r192[c], 0, 0 , 0]
+
+            
+
+            if c%3 == 0:
+
+                rcon = [round_constant_vector[counter], 0, 0 , 0]
+
+                temp_round_key = key[:]
+
+                temp_round_key = expand_key(temp_round_key,rcon,round_num)
+
+                rk.extend( [key[16:]+temp_round_key[:8]] )
+
+                rk.extend( [temp_round_key[8:]] )
+
+                counter = counter + 1
+
+                rcon = [round_constant_vector[counter], 0, 0 , 0]
+
+                key = temp_round_key[:]
+
+                temp_round_key = expand_key(temp_round_key,rcon,round_num)
+
+                rk.extend([temp_round_key[:16]])
+
+                key = temp_round_key[:]
 
         if round_num == 14:
-            rcon = [r256[c], 0, 0 , 0]
+
+            if c%2 == 0:
+                
+                rcon = [round_constant_vector[counter], 0, 0 , 0]
+
+                temp_round_key = key[:]
+
+                rk.extend( [key[16:]] )
+
+                temp_round_key = expand_key(temp_round_key,rcon,round_num)
+
+                counter = counter + 1
+
+                rcon = [round_constant_vector[counter], 0, 0 , 0]
+
+                key = temp_round_key[:]
+
+                rk.extend([temp_round_key[:16]])
+
+
 
     return rk
 

@@ -31,11 +31,9 @@ key_in_hex = binascii.hexlify( bytes(key, 'utf-8') ).decode('utf-8')
 space_padding = binascii.hexlify( bytes(spacebar,'utf-8') ).decode('utf-8')
 
 key_set_in_hex_pair = [key_in_hex[i:i+2] for i in range(0,len(key_in_hex), 2)]
-
-if round_num == 10:
     
-    padding_128 = [space_padding for i in range(len(key_in_hex),32, 2)]
-    key_set_in_hex_pair = key_set_in_hex_pair + padding_128
+padding_128 = [space_padding for i in range(len(key_in_hex),8*(round_num-6), 2)]
+key_set_in_hex_pair = key_set_in_hex_pair + padding_128
 
 print ("In HEX: ")
 for i in key_set_in_hex_pair:
@@ -93,6 +91,11 @@ decryption_time = 0
 key_schedule_time = t.time()
 
 round_key_set = schedule_key(round_key,round_num) 
+
+for key in round_key_set:
+    for byte in key:
+        print ( '%02X' % int(byte,16) ,end=' ' )
+    print("\n")
 
 key_schedule_time = t.time() - key_schedule_time
 
