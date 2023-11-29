@@ -1,4 +1,5 @@
 from BitVector import *
+import numpy as np
 
 Sbox = (
     0x63, 0x7C, 0x77, 0x7B, 0xF2, 0x6B, 0x6F, 0xC5, 0x30, 0x01, 0x67, 0x2B, 0xFE, 0xD7, 0xAB, 0x76,
@@ -51,6 +52,16 @@ InvMixer = [
     [BitVector(hexstring="0D"), BitVector(hexstring="09"), BitVector(hexstring="0E"), BitVector(hexstring="0B")],
     [BitVector(hexstring="0B"), BitVector(hexstring="0D"), BitVector(hexstring="09"), BitVector(hexstring="0E")]
 ]
+
+def transpose(list_of_list):
+
+    matrix = np.mat(list_of_list).reshape(4,4)
+
+    matrix.shape
+
+    matrix = matrix.transpose()
+
+    return matrix
 
 # b = BitVector(hexstring="4E")
 # int_val = b.intValue()
