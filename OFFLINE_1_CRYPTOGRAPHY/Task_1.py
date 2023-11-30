@@ -92,10 +92,10 @@ key_schedule_time = t.time()
 
 round_key_set = schedule_key(round_key,round_num) 
 
-for key in round_key_set:
-    for byte in key:
-        print ( '%02X' % int(byte,16) ,end=' ' )
-    print("\n")
+# for key in round_key_set:
+#     for byte in key:
+#         print ( '%02X' % int(byte,16) ,end=' ' )
+#     print("\n")
 
 key_schedule_time = t.time() - key_schedule_time
 
