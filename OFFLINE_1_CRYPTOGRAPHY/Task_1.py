@@ -141,7 +141,7 @@ for i in cipher_text:
 
 print("\n")
 
-print("In ASCII: ",cipher_text_str,"\n\n")
+print("In ASCII:",cipher_text_str,"\n\n")
 
 encryption_time = t.time() - encryption_time
 
@@ -188,12 +188,12 @@ for i in plain_text:
 
 print("\n")
 
-print("In ASCII: ",plain_text_str,"\n\n")
+print("In ASCII:",plain_text_str,"\n\n")
 
 decryption_time = t.time() - decryption_time
 
 decryption_time = decryption_time *1000
 
-print("Key Schedule Time : " ,key_schedule_time," sec")
-print("Encryption Time : ",encryption_time," sec")
-print("Decryption Time : ",decryption_time," sec")
+print("Key Schedule Time :" ,key_schedule_time,"sec")
+print("Encryption Time   :",encryption_time,"sec")
+print("Decryption Time   :",decryption_time,"sec")
