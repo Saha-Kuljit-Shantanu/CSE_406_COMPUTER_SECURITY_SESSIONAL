@@ -63,6 +63,11 @@ def transpose(list_of_list):
 
     return matrix
 
+def update_text(text_matrix):
+
+    text_mat = [[hex(i) for i in row] for row in np.array(text_matrix)]  
+    return text_mat
+
 # b = BitVector(hexstring="4E")
 # int_val = b.intValue()
 # s = Sbox[int_val]

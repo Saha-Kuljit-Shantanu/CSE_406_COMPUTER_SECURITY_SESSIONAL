@@ -1,4 +1,3 @@
-
 from RESOURCES import *
 
 
@@ -186,10 +185,7 @@ def mix_columns(shift_row_set_dec,is_Inverting):
 
 
 
-def update_text(text_matrix):
 
-    text_mat = [[hex(i) for i in row] for row in np.array(text_matrix)]  
-    return text_mat
 
 
     

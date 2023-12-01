@@ -3,7 +3,7 @@ from AES_HELPER_METHODS import add_round_key
 from AES_HELPER_METHODS import substitute_byte,inv_substitute_byte
 from AES_HELPER_METHODS import shift_row,inv_shift_row
 from AES_HELPER_METHODS import mix_columns
-from AES_HELPER_METHODS import update_text
+#from AES_HELPER_METHODS import update_text
 
 round_constant_vector = [1,2,4,8,16,32,64,128,27,54]
 
