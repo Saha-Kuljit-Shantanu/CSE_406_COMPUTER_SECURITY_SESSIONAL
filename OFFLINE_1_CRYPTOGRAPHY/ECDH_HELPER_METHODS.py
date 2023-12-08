@@ -9,7 +9,7 @@ def MOD(numerator,denominator,p) :
 
     while new_r != 0: 
 
-        fraction = int(r/new_r)
+        fraction = r//new_r
         #print(fraction)
 
         t_temp = new_t

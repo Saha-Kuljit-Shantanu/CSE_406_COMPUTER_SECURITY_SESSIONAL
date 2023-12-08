@@ -259,6 +259,8 @@ decryption_time = t.time() - decryption_time
 
 decryption_time = decryption_time *1000
 
+
+
 print("Key Schedule Time :" ,key_schedule_time,"sec")
 print("Encryption Time   :",encryption_time,"sec")
 print("Decryption Time   :",decryption_time,"sec")
