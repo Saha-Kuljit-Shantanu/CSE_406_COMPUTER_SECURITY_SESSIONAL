@@ -3,11 +3,53 @@ import os
 import pickle
 from KEYS_FOR_BOB import *
 import random as rand
+<<<<<<< HEAD
 from math import sqrt,cbrt,floor
 import binascii
 from AES_METHODS import schedule_key,decrypt
 
 
+=======
+from math import sqrt,cbrt,floor,ceil
+import binascii
+from AES_METHODS import schedule_key,encrypt,decrypt
+import threading
+import numpy as np
+
+def full_encrypt(nonse,key,round,text,counter,lock) :
+
+    
+
+    enc_text = encrypt(nonse,key,round)
+
+    lock.acquire()
+    
+    print( counter, enc_text )
+
+    lock.release()
+
+    enc_text = [item for row in np.array(enc_text) for item in row]
+
+    enc_text = [int(byte,16) for byte in np.array(enc_text)]
+
+    enc_text = enc_text[:len(text)]
+
+    text = [int(byte,16) for byte in np.array(text)]
+
+    lock.acquire()
+
+    print(counter, enc_text)
+
+    print(counter, text)
+
+    ctr_text = np.bitwise_xor(enc_text,text)
+
+    print(counter, ctr_text)
+
+    lock.release()
+
+    message_chunks[counter] = [hex(c) for c in ctr_text ]
+>>>>>>> 4e1a7e5b44137305c269355a177bd9b2d5c79a8c
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
@@ -28,7 +70,27 @@ if __name__ == '__main__' :
 
     print('Connected')
 
+<<<<<<< HEAD
     Alice_shared_key_tuple = conn[0].recv(1024*16)
+=======
+    data = conn[0].recv(1024*1024)
+
+    Alice_shared_key_tuple = data
+
+
+
+    # while data :
+
+    #     if not data :
+
+    #         #print("Done")
+    #         break
+
+    #     else : 
+
+    #         Alice_shared_key_tuple = Alice_shared_key_tuple + data
+    #         data = conn[0].recv(1024)
+>>>>>>> 4e1a7e5b44137305c269355a177bd9b2d5c79a8c
 
     unpickled_tuple = pickle.loads(Alice_shared_key_tuple)
 
@@ -48,17 +110,41 @@ if __name__ == '__main__' :
 
     received_key = unpickled_tuple[5]
 
+<<<<<<< HEAD
     IV_dec = unpickled_tuple[6]
 
     bt = rand.randrange(4,floor(sqrt(p-1)),7)
 
+=======
+    nonse_val = unpickled_tuple[6]
+
+    bt = rand.randrange(4,floor(sqrt(p-1)),7)
+
+    print()
+
+    print("From Alice : " , received_key)
+
+>>>>>>> 4e1a7e5b44137305c269355a177bd9b2d5c79a8c
 
     # Send shared Key to Alice
 
     my_shared_key = [ Bob_public_key(G,p,a,b,bt) ]
 
+<<<<<<< HEAD
     my_shared_key = pickle.dumps(my_shared_key)
 
+=======
+    print()
+
+    print(my_shared_key)
+
+    print()
+
+    my_shared_key = pickle.dumps(my_shared_key)
+
+    
+
+>>>>>>> 4e1a7e5b44137305c269355a177bd9b2d5c79a8c
     conn[0].send(my_shared_key)
 
     my_private_key = Bob_private_key(received_key,p,a,b,bt)
@@ -86,6 +172,7 @@ if __name__ == '__main__' :
     #print ( hex( int(i) )[2:] )
     print("\n\n")
 
+<<<<<<< HEAD
 #####################################################
 
     IV_in_hex = hex(IV_dec)[2:]
@@ -98,16 +185,125 @@ if __name__ == '__main__' :
     print("\n\n")
 
     round_key_set = schedule_key(key_set_in_hex_pair,round_num) 
+=======
+    round_key_set = schedule_key(key_set_in_hex_pair,round_num) 
+
+    print(round_key_set)
+
+
+#####################################################
+
+    # IV_in_hex = hex(IV_dec)[2:]
+    # IV_set_in_hex_pair = [IV_in_hex[i:i+2] for i in range(0,len(IV_in_hex), 2)]
+
+    # print ("In HEX: ")
+    # for i in IV_set_in_hex_pair:
+    #     print ( '%02X' % int(i,16) ,end=' ')
+    #     #print ( hex( int(i) )[2:] )
+    # print("\n\n")
+
+    # round_key_set = schedule_key(key_set_in_hex_pair,round_num) 
+>>>>>>> 4e1a7e5b44137305c269355a177bd9b2d5c79a8c
 
 
 ########################################################
 
+<<<<<<< HEAD
     file_b = open(dir_path + "\\1905119_bfile.txt","w")
 
     data = conn[0].recv(1024).decode('utf-8')
 
 
     file_b.write(data)
+=======
+    data = conn[0].recv(1024)
+    
+    Alice_msg = data
+
+
+
+    while data :
+
+        if not data :
+
+            #print("Done")
+            break
+
+        else : 
+
+            Alice_msg = Alice_msg + data
+            data = conn[0].recv(1024)
+            # print(Alice_msg)
+            # print()
+
+    unpickled_msg = pickle.loads(Alice_msg)
+
+    cipher_text = unpickled_msg[0]
+
+    threads = []
+    message_chunks = []
+    counter = 0
+
+    num_chunks = ceil( len(cipher_text)/16 )
+
+    for i in range(0,num_chunks,1):
+
+        if i == num_chunks-1 :
+
+            message_chunks.append( cipher_text[i*16:] )
+
+        else :
+
+            message_chunks.append( cipher_text[i*16:(i+1) * 16] )
+
+    #print(message_chunks)
+
+    lock = threading.Lock()
+    
+    for cipher_text in message_chunks :
+
+        nonse_in_hex = hex(nonse_val+counter)[2:]
+        nonse_set_in_hex_pair = [nonse_in_hex[i:i+2] for i in range(0,len(nonse_in_hex), 2)]
+
+        threads.append( threading.Thread(target = full_encrypt,args = (nonse_set_in_hex_pair,round_key_set,round_num,cipher_text,counter,lock)) )
+        threads[counter].start()
+        counter = counter + 1
+
+    counter = 0
+
+    for plain_text in message_chunks :
+        threads[counter].join()
+        counter = counter + 1
+    
+    #print(message_chunks)
+
+    plain_text = ""
+
+    for text in message_chunks:
+    
+        for byte in text:
+
+            plain_text = plain_text + chr(int(byte,16))
+
+    #print(plain_text)
+
+    out_file_name = dir_path + "\\1905119_bfile.txt"
+
+    file_b = open(out_file_name,"wb")
+
+    file_b.write( bytes(plain_text,encoding="utf-8") )
+
+
+
+#######################################################
+
+    # file_b = open(dir_path + "\\1905119_bfile.txt","w")
+
+    # data = conn[0].recv(1024).decode('utf-8')
+
+
+    # file_b.write(data)
+>>>>>>> 4e1a7e5b44137305c269355a177bd9b2d5c79a8c
 
     # data = conn[0].recv(1024).decode('utf-8')
 

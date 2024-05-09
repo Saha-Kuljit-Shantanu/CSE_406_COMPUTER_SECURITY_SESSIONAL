@@ -3,4 +3,8 @@ cedchhcuebcbchebc
 chbhbrycbhc
 123456
 7890
+<<<<<<< HEAD
 12
+=======
+12
+>>>>>>> 4e1a7e5b44137305c269355a177bd9b2d5c79a8c

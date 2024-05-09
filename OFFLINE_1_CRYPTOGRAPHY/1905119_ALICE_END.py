@@ -4,13 +4,58 @@ import pickle
 from KEYS_FOR_ALICE import *
 import random as rand
 from sympy import randprime
+<<<<<<< HEAD
 from math import sqrt,cbrt,floor
 from AES_METHODS import schedule_key,encrypt
 import binascii
+=======
+import numpy as np
+from math import sqrt,cbrt,floor
+from AES_METHODS import schedule_key,encrypt
+import binascii
+import threading
+>>>>>>> 4e1a7e5b44137305c269355a177bd9b2d5c79a8c
 
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
+<<<<<<< HEAD
+=======
+def full_encrypt(nonse,key,round,text,counter,lock) :
+
+    enc_text = encrypt(nonse,key,round)
+
+    lock.acquire()
+    
+    print( counter, enc_text )
+
+    lock.release()
+
+    enc_text = [item for row in np.array(enc_text) for item in row]
+
+    enc_text = [int(byte,16) for byte in np.array(enc_text)]
+
+    enc_text = enc_text[:len(text)]
+
+    text = [int(byte,16) for byte in np.array(text)]
+
+    lock.acquire()
+
+    print(counter, enc_text)
+
+    print(counter, text)
+
+    ctr_text = np.bitwise_xor(enc_text,text)
+
+    print(counter, ctr_text)
+
+    lock.release()
+
+    message_chunks[counter] = [hex(c) for c in ctr_text ]
+
+
+
+>>>>>>> 4e1a7e5b44137305c269355a177bd9b2d5c79a8c
 if __name__ == '__main__' :
 
     host = '127.0.0.1'
@@ -32,7 +77,11 @@ if __name__ == '__main__' :
     a = 0
     b = 0
     p = 0
+<<<<<<< HEAD
     IV_dec = 0
+=======
+    nonse_dec = 0
+>>>>>>> 4e1a7e5b44137305c269355a177bd9b2d5c79a8c
     L128 = 0x12345678901234567890123456789012
     U128 = 0xfffffffdfffffffdfffffffdfffffffd
     L192 = 0x123456789012345678901234567890123456789012345678
@@ -42,15 +91,22 @@ if __name__ == '__main__' :
 
     if aes == "1" :
         round_num = 10
+<<<<<<< HEAD
         a = rand.randrange(2,100000,5)
         y = rand.randrange(2,100000,5)
         p = randprime(L128,U128)        
         IV_dec = rand.randrange(L128,U128)
         x = rand.randrange(2,100000,5)
+=======
+        p = randprime(L128,U128)        
+        #nonse_dec = rand.randrange(L128,U128)
+       
+>>>>>>> 4e1a7e5b44137305c269355a177bd9b2d5c79a8c
         
 
     if aes == "2" :
         round_num = 12
+<<<<<<< HEAD
         a = rand.randrange(2,100000,5)
         y = rand.randrange(2,100000,5)
         p = randprime(L192,U192)  
@@ -67,6 +123,31 @@ if __name__ == '__main__' :
         
     b = y*y - x*x*x - a*x 
     b = b%p   
+=======
+        p = randprime(L192,U192)  
+        #nonse_dec = rand.randrange(L192,U192) 
+
+    
+
+    if aes == "3" :
+        round_num = 14
+        p = randprime(L256,U256)
+        #nonse_dec = rand.randrange(L256,U256)        
+
+    n = 0
+    while(n == 0) :
+        a = rand.randrange(2,10000000,5)
+        x = rand.randrange(2,10000000,5)
+        y = rand.randrange(2,10000000,5)
+
+        
+        b = y*y - x*x*x - a*x 
+        b = b%p 
+        n = 4*a*a*a + 27* b*b
+        n = n%p  
+
+    nonse_dec = rand.randrange(L128,U128)
+>>>>>>> 4e1a7e5b44137305c269355a177bd9b2d5c79a8c
 
     G = [x,y]
 
@@ -78,7 +159,15 @@ if __name__ == '__main__' :
 
     #tuple = [ { 'a':10, 'b':20, 'g':22 ,'key' : "Thats my Kung Fu"} ] 
 
+<<<<<<< HEAD
     Alice_shared_key_tuple = [p,a,b,G,round_num,my_shared_key,IV_dec]
+=======
+    Alice_shared_key_tuple = [p,a,b,G,round_num,my_shared_key,nonse_dec]
+
+    print(Alice_shared_key_tuple)
+
+    print()
+>>>>>>> 4e1a7e5b44137305c269355a177bd9b2d5c79a8c
 
     pickled_tuple = pickle.dumps(Alice_shared_key_tuple)
 
@@ -88,7 +177,29 @@ if __name__ == '__main__' :
 
     #Receive shared key from Bob
 
+<<<<<<< HEAD
     data = sock.recv(1024*16)
+=======
+    _data = sock.recv(1024*1024)
+    
+    data = _data
+
+
+
+    # while _data :
+
+    #     if not _data :
+
+    #         #print("Done")
+    #         break
+
+    #     else : 
+
+    #         data = data + _data
+    #         _data = sock.recv(1024)
+
+    #data = sock.recv(1024)
+>>>>>>> 4e1a7e5b44137305c269355a177bd9b2d5c79a8c
 
     received_key = pickle.loads(data)
 
@@ -122,6 +233,7 @@ if __name__ == '__main__' :
  ################################################################
  #    #data = encrypt()
 
+<<<<<<< HEAD
     IV_in_hex = hex(IV_dec)[2:]
     IV_set_in_hex_pair = [IV_in_hex[i:i+2] for i in range(0,len(IV_in_hex), 2)]
 
@@ -133,6 +245,20 @@ if __name__ == '__main__' :
 
     round_key_set = schedule_key(key_set_in_hex_pair,round_num) 
 
+=======
+    nonse_val = nonse_dec
+
+    # print ("In HEX: ")
+    # for i in IV_set_in_hex_pair:
+    #     print ( '%02X' % int(i,16) ,end=' ')
+    #     #print ( hex( int(i) )[2:] )
+    # print("\n\n")
+
+    round_key_set = schedule_key(key_set_in_hex_pair,round_num) 
+
+    print(round_key_set)
+
+>>>>>>> 4e1a7e5b44137305c269355a177bd9b2d5c79a8c
 
  ###############################################################
 
@@ -142,10 +268,19 @@ if __name__ == '__main__' :
 
     filename = dir_path + "\\1905119_afile.txt"
 
+<<<<<<< HEAD
     with open(filename, "r") as file_in:
         plain_text = file_in.read()
 
     message_in_hex = binascii.hexlify( bytes(plain_text, 'utf-8') ).decode('utf-8')
+=======
+    with open(filename, "rb") as file_in:
+        plain_text = file_in.read()
+
+    message_in_hex = plain_text.hex()
+
+    #message_in_hex = binascii.hexlify( bytes(plain_text, 'utf-8') ).decode('utf-8')
+>>>>>>> 4e1a7e5b44137305c269355a177bd9b2d5c79a8c
     null_padding = binascii.hexlify( bytes(null,'utf-8') ).decode('utf-8')
 
     msg_len = len(message_in_hex)
@@ -156,6 +291,7 @@ if __name__ == '__main__' :
     message_set_in_hex_pair = [message_in_hex[i:i+2] for i in range(0,msg_len, 2)]
     padding = [null_padding for i in range(msg_len,tot_len, 2)]
 
+<<<<<<< HEAD
     message_set_in_hex_pair = message_set_in_hex_pair + padding
 
     print ("In HEX: ")
@@ -163,12 +299,22 @@ if __name__ == '__main__' :
         print ( '%02X' % int(i,16) ,end=' ')
         #print ( hex( int(i) )[2:] )
     print("\n\n")
+=======
+    #message_set_in_hex_pair = message_set_in_hex_pair + padding
+
+    # print ("In HEX: ")
+    # for i in message_set_in_hex_pair:
+    #     print ( '%02X' % int(i,16) ,end=' ')
+    #     #print ( hex( int(i) )[2:] )
+    # print("\n\n")
+>>>>>>> 4e1a7e5b44137305c269355a177bd9b2d5c79a8c
 
     message_chunks = []
 
 
     for i in range(0,num_chunks,1):
 
+<<<<<<< HEAD
         message_chunks.append( message_set_in_hex_pair[i*(len(message_set_in_hex_pair))//num_chunks:(i+1) * (len(message_set_in_hex_pair))//num_chunks] )
 
 
@@ -198,4 +344,86 @@ if __name__ == '__main__' :
         except IOError :
 
             print("You have entered an invalid filename")
+=======
+        if i == num_chunks-1 :
+
+            message_chunks.append( message_set_in_hex_pair[i*16:] )
+
+        elif i == 0 :
+
+            message_chunks.append( message_set_in_hex_pair[:(i+1)*16] )
+
+        else:
+        
+            message_chunks.append( message_set_in_hex_pair[i*16:(i+1) * 16] )
+            #print(len(message_chunks[i]))
+
+
+    threads = []
+    counter = 0
+
+    #print(message_chunks)
+
+    lock = threading.Lock()
+    
+    for plain_text in message_chunks :
+
+        nonse_in_hex = hex(nonse_val+counter)[2:]
+        nonse_set_in_hex_pair = [nonse_in_hex[i:i+2] for i in range(0,len(nonse_in_hex), 2)]
+
+        threads.append( threading.Thread(target = full_encrypt,args = (nonse_set_in_hex_pair,round_key_set,round_num,plain_text,counter,lock)) )
+        threads[counter].start()
+        counter = counter + 1
+
+    counter = 0
+
+    for plain_text in message_chunks :
+        threads[counter].join()
+        counter = counter + 1
+    
+    #print(message_chunks)
+
+    cipher_text = []
+
+    for text in message_chunks:
+    
+        for byte in text:
+
+            cipher_text.append( byte )
+
+    #print(cipher_text)
+
+        
+    Alice_msg = [cipher_text]
+
+    pickled_msg = pickle.dumps(Alice_msg)
+
+    sock.send(pickled_msg)
+
+    # while True :
+
+    #     try : 
+
+    #         file_in = open(dir_path + "\\1905119_afile.txt","r")
+
+    #         data = file_in.read()
+
+    #         if not data : 
+
+    #             break
+
+    #         while data :
+
+    #             sock.send(str(data).encode('utf-8'))
+
+    #             data = file_in.read()
+
+    #         file_in.close()
+
+    #         break
+
+    #     except IOError :
+
+    #         print("You have entered an invalid filename")
+>>>>>>> 4e1a7e5b44137305c269355a177bd9b2d5c79a8c
 
